@@ -1,74 +1,354 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
   <meta charset="UTF-8">
   <title>Painel de Desempenho</title>
   <style>
-    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f6f9; margin: 0; padding: 20px; }
-    .container { max-width: 1400px; margin: auto; display: grid; grid-template-columns: 1.2fr 1fr; gap: 20px; transition: all 0.3s ease; }
-    .container.full-width { grid-template-columns: 1fr; }
-    @media (max-width: 900px) { .container { grid-template-columns: 1fr; } }
-    .panel { background: white; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); padding: 20px; }
-    
-    .tabs { display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 2px solid #eee; padding-bottom: 10px; }
-    .tab-btn { background: none; border: none; font-size: 16px; font-weight: bold; color: #888; cursor: pointer; padding: 8px 16px; border-radius: 5px; transition: 0.2s; }
-    .tab-btn:hover { background: #f0f0f0; color: #333; }
-    .tab-btn.active { background: #1f77b4; color: white; }
-    .tab-content { display: none; }
-    .tab-content.active { display: block; }
-
-    .arvore-container { max-height: 700px; overflow-y: auto; padding-right: 10px; }
-    #painel-detalhes { max-height: 750px; overflow-y: auto; }
-    #painel-detalhes.hidden { display: none; }
-    
-    .no-linha { display: flex; align-items: center; justify-content: space-between; padding: 10px 5px; border-bottom: 1px solid #f0f0f0; transition: background 0.2s; font-size: 14px; }
-    .no-linha:hover { background: #fafafa; }
-    .no-linha.pasta { background: #f8f9fa; border-left: 3px solid #6c757d; font-weight: bold; color: #111; cursor: pointer; }
-    .no-linha.folha { border-left: 3px solid transparent; color: #333; }
-
-    .no-esquerda { display: flex; align-items: center; gap: 8px; flex: 1; overflow: hidden; }
-    .seta { width: 16px; text-align: center; color: #555; font-size: 10px; transition: transform 0.2s; user-select: none; }
-    .seta.aberta { transform: rotate(90deg); }
-    .seta.vazia { visibility: hidden; }
-    
-    .no-titulo { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    
-    .no-direita { display: flex; align-items: center; gap: 15px; min-width: 320px; justify-content: flex-end; font-size: 13px; }
-    .contagem-total { color: #666; width: 50px; text-align: right; font-weight: 500; }
-    
-    .barra-dupla { display: flex; width: 120px; height: 10px; border-radius: 2px; overflow: hidden; border: 1px solid #ddd; }
-    .barra-verde { background: #2ca02c; height: 100%; transition: width 0.3s; }
-    .barra-vermelha { background: #d62728; height: 100%; transition: width 0.3s; }
-    .barra-cinza { background: #eee; height: 100%; width: 100%; }
-    
-    .stats { width: 110px; text-align: right; }
-    .stats .acerto { color: #2ca02c; font-weight: bold; }
-    .stats .erro { color: #d62728; font-weight: bold; }
-    .stats .nao-iniciado { color: #999; font-style: italic; }
-    
-    .btn-resolver {
-      background: #1f77b4; color: white; border: none; border-radius: 4px;
-      padding: 5px 10px; font-size: 11px; font-weight: bold; cursor: pointer;
-      width: auto; min-width: 70px; text-align: center; opacity: 0; transition: opacity 0.2s;
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f4f6f9;
+      margin: 0;
+      padding: 20px;
     }
-    .no-linha:hover .btn-resolver { opacity: 1; }
-    .btn-resolver.esgotado { background: #ccc; cursor: not-allowed; }
 
-    .topico-item { margin-bottom: 12px; background: #fdfdfd; padding: 12px; border-radius: 5px; border-left: 4px solid #ccc; }
-    .topico-item .titulo { font-weight: bold; color: #333; margin-bottom: 4px; font-size: 14px; }
-    .topico-item .caminho { font-size: 11px; color: #777; margin-bottom: 8px; line-height: 1.4; }
-    .topico-item .barra-wrapper { display: flex; align-items: center; gap: 10px; }
-    .topico-item .contagem { font-size: 12px; font-weight: bold; width: 140px; text-align: right; }
-    .botao-resolver-painel { margin-top: 10px; padding: 6px 12px; border: none; border-radius: 4px; font-size: 12px; font-weight: bold; cursor: pointer; }
-    .botao-resolver-painel.ativo { background: #2ca02c; color: white; }
-    .botao-resolver-painel.ativo:hover { background: #238023; }
-    .botao-resolver-painel.inativo { background: #ddd; color: #888; cursor: not-allowed; }
+    .container {
+      max-width: 1400px;
+      margin: auto;
+      display: grid;
+      grid-template-columns: 1.2fr 1fr;
+      gap: 20px;
+      transition: all 0.3s ease;
+    }
 
-    #loading { text-align: center; color: #888; padding: 40px; }
-    #erro { text-align: center; color: #d62728; padding: 40px; }
-    .modebar { display: none !important; }
+    .container.full-width {
+      grid-template-columns: 1fr;
+    }
+
+    @media (max-width: 900px) {
+      .container {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .panel {
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+      padding: 20px;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+      border-bottom: 2px solid #eee;
+      padding-bottom: 10px;
+    }
+
+    .tab-btn {
+      background: none;
+      border: none;
+      font-size: 16px;
+      font-weight: bold;
+      color: #888;
+      cursor: pointer;
+      padding: 8px 16px;
+      border-radius: 5px;
+      transition: 0.2s;
+    }
+
+    .tab-btn:hover {
+      background: #f0f0f0;
+      color: #333;
+    }
+
+    .tab-btn.active {
+      background: #1f77b4;
+      color: white;
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    .filtro-container {
+      margin-bottom: 15px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 14px;
+      color: #555;
+    }
+
+    .filtro-select {
+      padding: 6px;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+      font-family: inherit;
+      cursor: pointer;
+    }
+
+    .arvore-container {
+      max-height: 650px;
+      overflow-y: auto;
+      padding-right: 10px;
+    }
+
+    #painel-detalhes {
+      max-height: 750px;
+      overflow-y: auto;
+    }
+
+    #painel-detalhes.hidden {
+      display: none;
+    }
+
+    .no-linha {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 5px;
+      border-bottom: 1px solid #f0f0f0;
+      transition: background 0.2s;
+      font-size: 14px;
+    }
+
+    .no-linha:hover {
+      background: #fafafa;
+    }
+
+    .no-linha.pasta {
+      background: #f8f9fa;
+      border-left: 3px solid #6c757d;
+      font-weight: bold;
+      color: #111;
+      cursor: pointer;
+    }
+
+    .no-linha.folha {
+      border-left: 3px solid transparent;
+      color: #333;
+    }
+
+    .no-esquerda {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    .seta {
+      width: 16px;
+      text-align: center;
+      color: #555;
+      font-size: 10px;
+      transition: transform 0.2s;
+      user-select: none;
+    }
+
+    .seta.aberta {
+      transform: rotate(90deg);
+    }
+
+    .seta.vazia {
+      visibility: hidden;
+    }
+
+    .no-titulo {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .no-direita {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 380px;
+      justify-content: flex-end;
+      font-size: 13px;
+    }
+
+    .contagem-total {
+      color: #666;
+      width: 50px;
+      text-align: right;
+      font-weight: 500;
+    }
+
+    .barra-dupla {
+      display: flex;
+      width: 120px;
+      height: 10px;
+      border-radius: 2px;
+      overflow: hidden;
+      border: 1px solid #ddd;
+    }
+
+    .barra-verde {
+      background: #2ca02c;
+      height: 100%;
+      transition: width 0.3s;
+    }
+
+    .barra-vermelha {
+      background: #d62728;
+      height: 100%;
+      transition: width 0.3s;
+    }
+
+    .barra-cinza {
+      background: #eee;
+      height: 100%;
+      width: 100%;
+    }
+
+    .stats {
+      white-space: nowrap;
+      text-align: right;
+      min-width: 140px;
+    }
+
+    .stats .acerto {
+      color: #2ca02c;
+      font-weight: bold;
+    }
+
+    .stats .erro {
+      color: #d62728;
+      font-weight: bold;
+    }
+
+    .stats .nao-iniciado {
+      color: #999;
+      font-style: italic;
+    }
+
+    .btn-resolver {
+      background: #1f77b4;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      padding: 5px 10px;
+      font-size: 11px;
+      font-weight: bold;
+      cursor: pointer;
+      text-align: center;
+      white-space: nowrap;
+      min-width: 80px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+    }
+
+    .btn-resolver.esgotado {
+      background: #ccc;
+      cursor: not-allowed;
+    }
+
+    .spinner {
+      width: 12px;
+      height: 12px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    .topico-item {
+      margin-bottom: 12px;
+      background: #fdfdfd;
+      padding: 12px;
+      border-radius: 5px;
+      border-left: 4px solid #ccc;
+    }
+
+    .topico-item .titulo {
+      font-weight: bold;
+      color: #333;
+      margin-bottom: 4px;
+      font-size: 14px;
+    }
+
+    .topico-item .caminho {
+      font-size: 11px;
+      color: #777;
+      margin-bottom: 8px;
+      line-height: 1.4;
+    }
+
+    .topico-item .barra-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .topico-item .contagem {
+      font-size: 12px;
+      font-weight: bold;
+      width: 140px;
+      text-align: right;
+    }
+
+    .botao-resolver-painel {
+      margin-top: 10px;
+      padding: 6px 12px;
+      border: none;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: bold;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .botao-resolver-painel.ativo {
+      background: #2ca02c;
+      color: white;
+    }
+
+    .botao-resolver-painel.ativo:hover {
+      background: #238023;
+    }
+
+    .botao-resolver-painel.inativo {
+      background: #ddd;
+      color: #888;
+      cursor: not-allowed;
+    }
+
+    #loading {
+      text-align: center;
+      color: #888;
+      padding: 40px;
+    }
+
+    #erro {
+      text-align: center;
+      color: #d62728;
+      padding: 40px;
+    }
+
+    .modebar {
+      display: none !important;
+    }
   </style>
 </head>
+
 <body>
   <div class="container" id="main-container">
     <div class="panel">
@@ -82,12 +362,21 @@
       </div>
 
       <div id="aba-arvore" class="tab-content">
+        <div class="filtro-container">
+          <label for="filtro-arvore">Ordenar árvore por:</label>
+          <select id="filtro-arvore" class="filtro-select" onchange="montarListaMaterias()">
+            <option value="padrao">Piores primeiro (Padrão)</option>
+            <option value="nao_resolvidas">Não iniciadas (maior pool)</option>
+          </select>
+        </div>
         <div id="lista_materias_arvore" class="arvore-container"></div>
       </div>
     </div>
-    
+
     <div class="panel" id="painel-detalhes">
-      <div id="loading"><h3>Carregando…</h3></div>
+      <div id="loading">
+        <h3>Carregando…</h3>
+      </div>
     </div>
   </div>
 
@@ -98,13 +387,14 @@
 
     const painel = document.getElementById("painel-detalhes");
     const container = document.getElementById("main-container");
+    let dadosMateriasGlobal = [];
 
     function mudarAba(idAba, btn) {
       document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
       document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
       document.getElementById(idAba).classList.add('active');
       btn.classList.add('active');
-      
+
       if (idAba === 'aba-bolhas') {
         container.classList.remove('full-width');
         painel.classList.remove('hidden');
@@ -128,14 +418,18 @@
       try {
         const data = await get({ action: "dashboard_geral" });
         if (data.status !== "ok") throw new Error(data.mensagem);
-        desenharBolhas(data.materias);
-        montarListaMaterias(data.materias);
+        dadosMateriasGlobal = data.materias;
+
+        desenharBolhas(dadosMateriasGlobal);
+        montarListaMaterias();
+
         painel.innerHTML = '<div style="text-align:center;color:#888;padding:50px;"><h3>Nenhuma matéria selecionada</h3><p>Clique em uma bolha no gráfico para ver os tópicos.</p></div>';
       } catch (e) {
         painel.innerHTML = '<div id="erro"><h3>Erro</h3><p>' + e.message + '</p></div>';
       }
     }
 
+    // ================== ABA 1: BOLHAS ==================
     function desenharBolhas(materias) {
       const respondidas = materias.filter(m => m.respondidas > 0);
       if (respondidas.length === 0) {
@@ -151,31 +445,37 @@
         if (maxResolvidas === 1) return 30;
         return 10 + (50 * (qtd / maxResolvidas));
       });
-      const maxY = Math.max(...y, 5);
 
       const trace = {
         type: "scatter", mode: "markers", x: x, y: y, customdata: custom,
         hovertemplate: "<b>%{customdata}</b><br>Acertos: %{x:.1f}%<br>Resolvidas: %{y}<br><i>Clique para ver os tópicos</i><extra></extra>",
         marker: {
           size: tamanhos, sizemode: "diameter", sizeref: 1,
-          color: cores, colorscale: [[0, "rgb(165,0,38)"],[0.3, "rgb(244,109,67)"],[0.5, "rgb(255,255,191)"],[0.7, "rgb(166,217,106)"],[1, "rgb(0,104,55)"]],
+          color: cores, colorscale: [[0, "rgb(165,0,38)"], [0.3, "rgb(244,109,67)"], [0.5, "rgb(255,255,191)"], [0.7, "rgb(166,217,106)"], [1, "rgb(0,104,55)"]],
           cmin: 0, cmax: 100, line: { color: "white", width: 2 }, opacity: 0.9
         }
       };
 
       const layout = {
         title: { text: "Desempenho por Matéria", x: 0.05 },
-        xaxis: { title: "PERCENTUAL DE ACERTOS", range: [-10, 110], tickformat: ".0f", zeroline: false },
-        yaxis: { title: "QUESTÕES RESOLVIDAS", range: [-1, maxY + 2], rangemode: "tozero" },
+        showlegend: false, // Aqui esconde o "trace 0 / trace 1"
+        xaxis: { title: "PERCENTUAL DE ACERTOS", range: [-5, 105], tickformat: ".0f", zeroline: false },
+        yaxis: { title: "QUESTÕES RESOLVIDAS", range: [-2, 102], rangemode: "tozero" },
         shapes: [
-          { type: "line", x0: 50, x1: 50, y0: 0, y1: 1, yref: "paper", line: { color: "#333", width: 1.5 } },
-          { type: "line", x0: -10, x1: 110, y0: maxY / 2, y1: maxY / 2, line: { color: "#333", width: 1.5 } }
+          { type: "line", x0: 50, x1: 50, y0: -2, y1: 102, line: { color: "#333", width: 1.5 } },
+          { type: "line", x0: -5, x1: 105, y0: 50, y1: 50, line: { color: "#333", width: 1.5 } }
         ],
         annotations: [
-          { font: { color: "#F2F2F2", family: "Arial Black", size: 60 }, showarrow: false, text: "Q2", x: 20, y: maxY * 0.8 },
-          { font: { color: "#F2F2F2", family: "Arial Black", size: 60 }, showarrow: false, text: "Q3", x: 80, y: maxY * 0.8 },
-          { font: { color: "#F2F2F2", family: "Arial Black", size: 60 }, showarrow: false, text: "Q1", x: 20, y: maxY * 0.2 },
-          { font: { color: "#F2F2F2", family: "Arial Black", size: 60 }, showarrow: false, text: "Q4", x: 80, y: maxY * 0.2 }
+          // O alvo visual no extremo
+          {
+            font: { color: "#ccc", family: "Arial", size: 24 },
+            showarrow: false,
+            text: "🎯",
+            x: 1.0, y: 1.0,
+            xref: "paper", yref: "paper",
+            hovertext: "Zona de Aprovação",
+            hoverlabel: { bgcolor: "#333", font: { color: "white" } }
+          }
         ],
         margin: { t: 50, b: 60, l: 60, r: 20 }, plot_bgcolor: "white", paper_bgcolor: "white", hovermode: "closest"
       };
@@ -183,81 +483,57 @@
       Plotly.newPlot("grafico_quadrantes", [trace], layout, { responsive: true });
       document.getElementById("grafico_quadrantes").on("plotly_click", ev => carregarTopicosNoPainel(ev.points[0].customdata));
     }
-
-    function montarListaMaterias(materias) {
+    // ================== ABA 2: ÁRVORE ==================
+    function montarListaMaterias() {
       const containerArvore = document.getElementById("lista_materias_arvore");
-      containerArvore.innerHTML = ""; 
-      materias.sort((a, b) => a.percentual_acerto - b.percentual_acerto);
+      containerArvore.innerHTML = "";
+
+      const filtro = document.getElementById("filtro-arvore").value;
+      let materias = [...dadosMateriasGlobal];
+
+      materias.sort((a, b) => {
+        if (filtro === "nao_resolvidas") {
+          if (b.no_pool !== a.no_pool) return b.no_pool - a.no_pool;
+          return a.percentual_acerto - b.percentual_acerto;
+        } else {
+          function getGrupo(t) {
+            if (t.respondidas === 0) return 3;
+            if (t.percentual_acerto < 50) return 1;
+            return 2;
+          }
+          const gA = getGrupo(a);
+          const gB = getGrupo(b);
+          if (gA !== gB) return gA - gB;
+          if (gA === 1 || gA === 2) return a.percentual_acerto - b.percentual_acerto;
+          return b.no_pool - a.no_pool;
+        }
+      });
 
       materias.forEach(mat => {
         const div = document.createElement("div");
-        const pct = mat.percentual_acerto;
-        const pctErro = 100 - pct;
-        
-        let statsHtml = pct > 0 
-          ? `<span class="acerto">${pct.toFixed(0)}%</span> (${mat.acertos}) <span class="erro">${pctErro.toFixed(0)}%</span> (${mat.respondidas - mat.acertos})` 
-          : `<span class="nao-iniciado">Não iniciado</span>`;
-          
-        let barraHtml = pct > 0 
-          ? `<div class="barra-dupla"><div class="barra-verde" style="width: ${pct}%"></div><div class="barra-vermelha" style="width: ${pctErro}%"></div></div>`
-          : `<div class="barra-dupla"><div class="barra-cinza"></div></div>`;
-
-        div.innerHTML = `
-          <div class="no-linha pasta">
-            <div class="no-esquerda">
-              <div class="seta">▶</div>
-              <div class="no-titulo">${mat.materia}</div>
-            </div>
-            <div class="no-direita">
-              <div class="contagem-total">${mat.total_vinculadas}</div>
-              ${barraHtml}
-              <div class="stats">${statsHtml}</div>
-              <div style="width: 160px;"></div>
-            </div>
-          </div>
-          <div class="filhos-container" style="display: none;"></div>
-        `;
-
+        div.innerHTML = `<div class="no-linha pasta" style="padding: 10px 5px; color: #888;">Carregando...</div>`;
         containerArvore.appendChild(div);
 
-        const linha = div.querySelector(".no-linha");
-        const seta = div.querySelector(".seta");
-        const filhosContainer = div.querySelector(".filhos-container");
-
-        linha.onclick = async () => {
-          const isHidden = filhosContainer.style.display === "none";
-          filhosContainer.style.display = isHidden ? "block" : "none";
-          seta.classList.toggle("aberta", isHidden);
-          
-          if (isHidden && filhosContainer.children.length === 0) {
-            filhosContainer.innerHTML = '<div style="padding: 10px; color: #888; font-size: 13px;">Carregando tópicos...</div>';
-            try {
-              const res = await get({ action: "listar_topicos", materia: mat.materia });
-              if (res.status === "ok" && res.arvore) {
-                filhosContainer.innerHTML = ""; 
-                res.arvore.forEach(topico => {
-                  if (topico.nome === mat.materia && topico.children && topico.children.length > 0) {
-                    topico.children.forEach(sub => renderizarNo(sub, 1, filhosContainer));
-                  } else {
-                    renderizarNo(topico, 1, filhosContainer);
-                  }
-                });
-              }
-            } catch(e) {
-              filhosContainer.innerHTML = '<div style="padding: 10px; color: #d62728; font-size: 13px;">Erro de rede.</div>';
-            }
+        get({ action: "listar_topicos", materia: mat.materia }).then(res => {
+          div.innerHTML = "";
+          if (res.status === "ok" && res.arvore && res.arvore.length > 0) {
+            const filtroAtual = document.getElementById("filtro-arvore").value;
+            renderizarNo(res.arvore[0], 0, div, filtroAtual);
+          } else {
+            div.innerHTML = `<div class="no-linha folha">Erro ao carregar</div>`;
           }
-        };
+        });
       });
     }
 
-    function renderizarNo(no, nivel, parentContainer) {
+    function renderizarNo(no, nivel, parentContainer, filtro) {
       const div = document.createElement("div");
       const temFilhos = no.children && no.children.length > 0;
       const pct = no.percentual_acerto;
       const respondidas = no.respondidas;
-      const erros = respondidas - no.acertos;
-      
+      const acertos = no.acertos;
+      const erros = respondidas - acertos;
+
       let statsHtml = '';
       let barraHtml = '';
 
@@ -266,7 +542,7 @@
         barraHtml = `<div class="barra-dupla"><div class="barra-cinza"></div></div>`;
       } else {
         const pctErro = 100 - pct;
-        statsHtml = `<span class="acerto">${pct.toFixed(0)}%</span> (${no.acertos}) <span class="erro">${pctErro.toFixed(0)}%</span> (${erros})`;
+        statsHtml = `<span class="acerto">${pct.toFixed(0)}%</span> (${acertos}) <span class="erro">${pctErro.toFixed(0)}%</span> (${erros})`;
         barraHtml = `
           <div class="barra-dupla">
             <div class="barra-verde" style="width: ${pct}%"></div>
@@ -275,17 +551,12 @@
       }
 
       let btnHtml = '';
-      if (no.no_pool_diretos > 0 && no.no_pool_total > 0 && no.no_pool_diretos !== no.no_pool_total) {
-          btnHtml = `
-            <button class="btn-resolver" onclick="event.stopPropagation(); resolver(${no.id}, 'direto')">Direto (${no.no_pool_diretos})</button>
-            <button class="btn-resolver" style="background:#155a8a; margin-left:5px;" onclick="event.stopPropagation(); resolver(${no.id}, 'total')">Tudo (${no.no_pool_total})</button>
-          `;
-      } else if (no.no_pool_total > 0) {
-          btnHtml = `<button class="btn-resolver" onclick="event.stopPropagation(); resolver(${no.id}, 'total')">Resolver (${no.no_pool_total})</button>`;
+      if (no.no_pool_total > 0) {
+        btnHtml = `<button class="btn-resolver" onclick="event.stopPropagation(); resolver(${no.id}, this)">Resolver (${no.no_pool_total})</button>`;
       } else if (respondidas > 0) {
-          btnHtml = `<button class="btn-resolver esgotado" disabled>Esgotado</button>`;
+        btnHtml = `<button class="btn-resolver esgotado" disabled>Esgotado</button>`;
       } else {
-          btnHtml = `<div style="width: 160px;"></div>`;
+        btnHtml = `<div style="width: 110px;"></div>`;
       }
 
       div.innerHTML = `
@@ -298,7 +569,7 @@
             <div class="contagem-total">${no.total_vinculadas}</div>
             ${barraHtml}
             <div class="stats">${statsHtml}</div>
-            <div style="width: 160px; display: flex; justify-content: flex-end;">${btnHtml}</div>
+            <div style="width: 110px; display: flex; justify-content: flex-end;">${btnHtml}</div>
           </div>
         </div>
         <div class="filhos-container" style="display: none;"></div>
@@ -310,25 +581,47 @@
         const linha = div.querySelector(".no-linha");
         const seta = div.querySelector(".seta");
         const filhosContainer = div.querySelector(".filhos-container");
-        
+
+        let filhosOrdenados = [...no.children];
+        filhosOrdenados.sort((a, b) => {
+          if (filtro === "nao_resolvidas") {
+            if (b.no_pool_total !== a.no_pool_total) return b.no_pool_total - a.no_pool_total;
+            return a.percentual_acerto - b.percentual_acerto;
+          } else {
+            function getGrupo(t) {
+              if (t.respondidas === 0) return 3;
+              if (t.percentual_acerto < 50) return 1;
+              return 2;
+            }
+            const gA = getGrupo(a);
+            const gB = getGrupo(b);
+            if (gA !== gB) return gA - gB;
+
+            if (gA === 1 || gA === 2) return a.percentual_acerto - b.percentual_acerto;
+            return b.no_pool_total - a.no_pool_total;
+          }
+        });
+
         linha.onclick = () => {
           const isHidden = filhosContainer.style.display === "none";
           filhosContainer.style.display = isHidden ? "block" : "none";
           seta.classList.toggle("aberta", isHidden);
-          
+
           if (isHidden && filhosContainer.children.length === 0) {
-            no.children.forEach(filho => renderizarNo(filho, nivel + 1, filhosContainer));
+            filhosOrdenados.forEach(filho => renderizarNo(filho, nivel + 1, filhosContainer, filtro));
           }
         };
       }
     }
 
+    // ================== PAINEL DIREITO (BOLHA COM FILTRO) ==================
     async function carregarTopicosNoPainel(materia) {
-      painel.innerHTML = '<div id="loading"><h3>Carregando tópicos…</h3></div>';
+      painel.innerHTML = '<div id="loading" style="text-align:center; color:#888; padding:40px;"><h3>Carregando tópicos…</h3></div>';
+
       try {
         const res = await get({ action: "listar_topicos", materia: materia });
         if (res.status !== "ok" || !res.arvore) throw new Error("Erro ao carregar");
-        
+
         const folhas = [];
         function coletarFolhas(nos) {
           nos.forEach(n => {
@@ -341,67 +634,156 @@
         }
         coletarFolhas(res.arvore);
 
-        folhas.sort((a, b) => a.percentual_acerto - b.percentual_acerto);
+        window.folhasBolhaAtual = folhas;
+        window.materiaBolhaAtual = materia;
 
-        let html = `<h2 style="color:#1f77b4;margin-top:0;border-bottom:2px solid #eee;padding-bottom:10px;font-size:18px;">${materia}</h2>`;
-        
-        if (folhas.length === 0) {
-          html += `<p style="text-align:center;color:#888;padding:20px;">Nenhum tópico cadastrado.</p>`;
-        } else {
-          html += '<div>';
-          folhas.forEach(t => {
-            const pct = t.percentual_acerto;
-            let corBarra = "#ccc";
-            if (t.respondidas > 0) {
-              if (pct >= 80) corBarra = "#2ca02c";
-              else if (pct >= 50) corBarra = "#ff7f0e";
-              else corBarra = "#d62728";
-            }
-            const label = t.respondidas > 0
-              ? `${pct.toFixed(0)}% (${t.respondidas} feitas · ${t.no_pool_diretos} no pool)`
-              : `Não iniciado · ${t.no_pool_diretos} no pool`;
+        painel.innerHTML = `
+          <div class="filtro-container">
+            <label for="filtro-bolha">Ordenar por:</label>
+            <select id="filtro-bolha" class="filtro-select" onchange="renderizarPainelBolha()">
+              <option value="padrao">Mais fracos (e depois não iniciados)</option>
+              <option value="nao_resolvidas">Não iniciados primeiro</option>
+              <option value="nome">Ordem alfabética</option>
+            </select>
+          </div>
+          <div id="lista-bolha-content"></div>
+        `;
 
-            html += '<div class="topico-item" style="border-left-color:' + corBarra + '">';
-            html += '  <div class="titulo">' + t.nome + '</div>';
-            html += '  <div class="caminho">' + t.caminho_completo + '</div>';
-            html += '  <div class="barra-wrapper">';
-            html += '    <div class="barra-dupla" style="flex:1;width:auto;"><div class="barra-verde" style="width:' + (t.respondidas > 0 ? pct : 0) + '%;background:' + corBarra + '"></div><div class="barra-cinza" style="width:' + (t.respondidas > 0 ? 100-pct : 100) + '%"></div></div>';
-            html += '    <div class="contagem" style="color:' + corBarra + '">' + label + '</div>';
-            html += '  </div>';
+        renderizarPainelBolha();
 
-            if (t.no_pool_diretos > 0) {
-              html += '  <button class="botao-resolver-painel ativo" onclick="resolver(' + t.id + ', \'direto\')">Resolver (' + t.no_pool_diretos + ')</button>';
-            } else if (t.respondidas > 0) {
-              html += '  <button class="botao-resolver-painel inativo" disabled>Esgotado</button>';
-            } else {
-              html += '  <button class="botao-resolver-painel inativo" disabled>Sem questões</button>';
-            }
-            html += '</div>';
-          });
-          html += '</div>';
-        }
-        
-        painel.innerHTML = html;
       } catch (e) {
         painel.innerHTML = '<div id="erro"><h3>Erro</h3><p>' + e.message + '</p></div>';
       }
     }
 
-    async function resolver(topicoId, tipo) {
+    function renderizarPainelBolha() {
+      const filtro = document.getElementById("filtro-bolha").value;
+      let folhas = [...window.folhasBolhaAtual];
+      const materia = window.materiaBolhaAtual;
+
+      folhas.sort((a, b) => {
+        if (filtro === "nome") return a.nome.localeCompare(b.nome);
+
+        if (filtro === "nao_resolvidas") {
+          if (a.respondidas === 0 && b.respondidas > 0) return -1;
+          if (a.respondidas > 0 && b.respondidas === 0) return 1;
+          if (a.respondidas === 0 && b.respondidas === 0) return b.no_pool_diretos - a.no_pool_diretos;
+          return a.percentual_acerto - b.percentual_acerto;
+        }
+
+        function getGrupo(t) {
+          if (t.respondidas === 0) return 3;
+          if (t.percentual_acerto < 50) return 1;
+          return 2;
+        }
+        const gA = getGrupo(a);
+        const gB = getGrupo(b);
+        if (gA !== gB) return gA - gB;
+
+        if (gA === 1 || gA === 2) return a.percentual_acerto - b.percentual_acerto;
+        return b.no_pool_diretos - a.no_pool_diretos;
+      });
+
+      let html = `<h2 style="color:#1f77b4;margin-top:0;border-bottom:2px solid #eee;padding-bottom:10px;font-size:18px;">${materia}</h2>`;
+
+      if (folhas.length === 0) {
+        html += `<p style="text-align:center;color:#888;padding:20px;">Nenhum tópico cadastrado.</p>`;
+      } else {
+        html += '<div>';
+        folhas.forEach(t => {
+          const pct = t.percentual_acerto;
+          let corBarra = "#ccc";
+          if (t.respondidas > 0) {
+            if (pct >= 80) corBarra = "#2ca02c";
+            else if (pct >= 50) corBarra = "#ff7f0e";
+            else corBarra = "#d62728";
+          }
+          const label = t.respondidas > 0
+            ? `${pct.toFixed(0)}% (${t.respondidas} feitas · ${t.no_pool_diretos} no pool)`
+            : `Não iniciado · ${t.no_pool_diretos} no pool`;
+
+          html += '<div class="topico-item" style="border-left-color:' + corBarra + '">';
+          html += '  <div class="titulo">' + t.nome + '</div>';
+          html += '  <div class="caminho">' + t.caminho_completo + '</div>';
+          html += '  <div class="barra-wrapper">';
+          html += '    <div class="barra-dupla" style="flex:1;width:auto;"><div class="barra-verde" style="width:' + (t.respondidas > 0 ? pct : 0) + '%;background:' + corBarra + '"></div><div class="barra-cinza" style="width:' + (t.respondidas > 0 ? 100 - pct : 100) + '%"></div></div>';
+          html += '    <div class="contagem" style="color:' + corBarra + '">' + label + '</div>';
+          html += '  </div>';
+
+          if (t.no_pool_diretos > 0) {
+            html += '  <button class="botao-resolver-painel ativo" onclick="resolver(' + t.id + ', this)">Resolver (' + t.no_pool_diretos + ')</button>';
+          } else if (t.respondidas > 0) {
+            html += '  <button class="botao-resolver-painel inativo" disabled>Esgotado</button>';
+          } else {
+            html += '  <button class="botao-resolver-painel inativo" disabled>Sem questões</button>';
+          }
+          html += '</div>';
+        });
+        html += '</div>';
+      }
+
+      document.getElementById("lista-bolha-content").innerHTML = html;
+    }
+
+    // ================== AÇÕES ==================
+    async function resolver(topicoId, botaoClicado) {
+      const htmlOriginal = botaoClicado ? botaoClicado.innerHTML : 'Resolver';
+      if (botaoClicado) {
+        botaoClicado.innerHTML = '<div class="spinner"></div> Gerando...';
+        botaoClicado.style.opacity = '0.8';
+        botaoClicado.disabled = true;
+      }
+
       try {
-        const params = { action: "gerarLote", topico_id: topicoId };
-        if (tipo) params.tipo = tipo;
-        
-        const data = await get(params);
+        const data = await get({ action: "gerarLote", topico_id: topicoId, tipo: 'total' });
         if (data.status !== "ok") throw new Error(data.mensagem || "Erro ao gerar lote.");
+
         const url = "https://concursos.estrategia.com/questoes/" + data.primeiro_codigo + "/#lote=" + data.lote_id;
-        window.location.href = url;
+        window.open(url, '_blank');
+
       } catch (e) {
         alert("Erro: " + e.message);
+      } finally {
+        if (botaoClicado) {
+          botaoClicado.innerHTML = htmlOriginal;
+          botaoClicado.style.opacity = '1';
+          botaoClicado.disabled = false;
+        }
+      }
+    }
+
+    async function resolverMateriaCompleta(materiaNome, botaoClicado) {
+      const htmlOriginal = botaoClicado ? botaoClicado.innerHTML : 'Resolver';
+      if (botaoClicado) {
+        botaoClicado.innerHTML = '<div class="spinner"></div> Gerando...';
+        botaoClicado.style.opacity = '0.8';
+        botaoClicado.disabled = true;
+      }
+
+      try {
+        const res = await get({ action: "listar_topicos", materia: materiaNome });
+        if (res.status !== "ok" || !res.arvore || res.arvore.length === 0) throw new Error("Não foi possível encontrar o ID da matéria.");
+
+        const idRaiz = res.arvore[0].id;
+        const data = await get({ action: "gerarLote", topico_id: idRaiz, tipo: 'total' });
+        if (data.status !== "ok") throw new Error(data.mensagem || "Erro ao gerar lote.");
+
+        const url = "https://concursos.estrategia.com/questoes/" + data.primeiro_codigo + "/#lote=" + data.lote_id;
+        window.open(url, '_blank');
+
+      } catch (e) {
+        alert("Erro: " + e.message);
+      } finally {
+        if (botaoClicado) {
+          botaoClicado.innerHTML = htmlOriginal;
+          botaoClicado.style.opacity = '1';
+          botaoClicado.disabled = false;
+        }
       }
     }
 
     carregarGraficos();
   </script>
 </body>
+
 </html>
